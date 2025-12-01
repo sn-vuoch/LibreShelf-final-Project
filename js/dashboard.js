@@ -28,7 +28,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   } catch (error) {
     console.error("Dashboard Error:", error);
     alert("Failed to load dashboard data. Please login again.");
-    window.location.href = "../html/signin.html";
+    window.location.href = "../pages/signin.html";
   }
 });
 
