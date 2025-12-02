@@ -12,46 +12,68 @@
     />
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
+    <!-- Essential Scripts -->
     <script type="module" src="../js/api.js"></script>
     <script src="../js/theme.js"></script>
   </head>
   <body
-    class="bg-gray-50 dark:bg-slate-900 font-primary text-text-black dark:text-gray-100 transition-colors duration-300"
+    class="bg-gray-50 dark:bg-slate-900 font-sans text-text-black dark:text-gray-100 transition-colors duration-300"
   >
-    <!-- Navbar -->
     <div id="navbar-container"></div>
 
     <main
       class="max-w-[1440px] mx-auto pt-24 pb-12 px-4 sm:px-6 lg:px-8 min-h-screen flex flex-col md:flex-row gap-8"
     >
       <!-- SIDEBAR MENU -->
-      <aside class="w-full md:w-64 flex-shrink-0">
+      <aside class="w-full md:w-72 flex-shrink-0">
         <div
-          class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-6"
+          class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 p-6 sticky top-28"
         >
-          <!-- User Mini Profile -->
-          <div class="text-center mb-6">
+          <!-- User Mini Profile & Avatar Upload -->
+          <div class="text-center mb-8 relative">
+            <!-- Avatar Container -->
             <div
-              class="w-20 h-20 rounded-full overflow-hidden mx-auto border-2 border-primary dark:border-accent mb-3"
+              class="relative w-28 h-28 mx-auto rounded-full overflow-hidden border-4 border-white dark:border-slate-700 shadow-lg cursor-pointer group"
+              onclick="document.getElementById('avatar-input').click()"
             >
+              <!-- Current Image -->
               <img
                 id="sidebar-avatar"
                 src="https://placehold.co/100"
-                class="w-full h-full object-cover"
+                class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
               />
+
+              <!-- Hover Overlay (Camera Icon) -->
+              <div
+                class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                <i class="ph-bold ph-camera text-white text-3xl"></i>
+              </div>
             </div>
-            <h3
-              id="sidebar-name"
-              class="font-bold text-lg text-primary dark:text-white"
-            >
-              Loading...
-            </h3>
-            <p
-              id="sidebar-role"
-              class="text-xs text-gray-500 uppercase tracking-wider"
-            >
-              Student
-            </p>
+
+            <!-- Hidden File Input -->
+            <input
+              type="file"
+              id="avatar-input"
+              accept="image/*"
+              class="hidden"
+            />
+
+            <!-- Text Info -->
+            <div class="mt-4">
+              <h3
+                id="sidebar-name"
+                class="font-bold text-xl text-primary dark:text-white"
+              >
+                Loading...
+              </h3>
+              <p
+                id="sidebar-role"
+                class="text-xs text-gray-500 uppercase tracking-wider font-bold mt-1"
+              >
+                Student
+              </p>
+            </div>
           </div>
 
           <!-- Menu Links -->
@@ -84,7 +106,7 @@
       <!-- MAIN CONTENT AREA -->
       <div class="flex-1">
         <!-- TAB 1: PROFILE SETTINGS -->
-        <section id="tab-profile" class="space-y-6">
+        <section id="tab-profile" class="space-y-6 animate-fade-in">
           <div
             class="bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-sm border border-gray-200 dark:border-slate-700"
           >
@@ -165,9 +187,9 @@
               <div class="flex justify-end">
                 <button
                   type="submit"
-                  class="bg-primary hover:bg-secondary text-white font-bold py-3 px-8 rounded-lg shadow-md transition-all"
+                  class="bg-primary hover:bg-secondary text-white font-bold py-3 px-8 rounded-lg shadow-md transition-all flex items-center gap-2"
                 >
-                  Save Changes
+                  <i class="ph-bold ph-floppy-disk"></i> Save Changes
                 </button>
               </div>
             </form>
@@ -175,7 +197,7 @@
         </section>
 
         <!-- TAB 2: MY BOOKS (Teacher Only) -->
-        <section id="tab-books" class="hidden space-y-6">
+        <section id="tab-books" class="hidden space-y-6 animate-fade-in">
           <div
             class="flex justify-between items-center bg-white dark:bg-slate-800 p-6 rounded-2xl border border-gray-200 dark:border-slate-700 shadow-sm"
           >
@@ -190,7 +212,7 @@
             <!-- Upload Button -->
             <a
               href="upload.html"
-              class="bg-accent hover:bg-yellow-400 text-primary font-bold py-2 px-6 rounded-lg shadow-sm flex items-center gap-2"
+              class="bg-accent hover:bg-yellow-400 text-primary font-bold py-2 px-6 rounded-lg shadow-sm flex items-center gap-2 transition"
             >
               <i class="ph-bold ph-plus"></i> Upload New
             </a>
@@ -199,27 +221,28 @@
           <!-- Books Grid -->
           <div
             id="my-books-grid"
-            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6"
           >
             <!-- Books injected by JS -->
           </div>
         </section>
 
-        <!-- TAB 3: FAVORITES (Placeholder) -->
-        <section id="tab-favorites" class="hidden">
+        <!-- TAB 3: FAVORITES -->
+        <section id="tab-favorites" class="hidden space-y-6 animate-fade-in">
           <div
-            class="bg-white dark:bg-slate-800 p-12 rounded-2xl border border-gray-200 dark:border-slate-700 text-center"
+            class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-gray-200 dark:border-slate-700 shadow-sm"
           >
-            <i
-              class="ph-duotone ph-heart-break text-6xl text-gray-300 mb-4"
-            ></i>
-            <h3 class="text-xl font-bold text-gray-400">No favorites yet</h3>
-            <p class="text-gray-400">Start exploring books to add them here.</p>
-            <a
-              href="categories.html"
-              class="inline-block mt-6 text-accent hover:underline"
-              >Browse Books</a
-            >
+            <h2 class="text-2xl font-bold text-primary dark:text-white">
+              My Favorites
+            </h2>
+            <p class="text-gray-500 text-sm">Books you have bookmarked.</p>
+          </div>
+
+          <div
+            id="favorites-grid"
+            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+          >
+            <!-- Favorites injected by JS -->
           </div>
         </section>
       </div>
@@ -235,22 +258,26 @@
       renderNavbar("navbar-container", "");
       renderFooter("footer-container");
 
-      // Simple Tab Switcher Global Function
+      // Tab Switcher Logic
       window.switchTab = (tabName) => {
-        // 1. Hide all tabs
         document
           .querySelectorAll("main > div > section")
           .forEach((el) => el.classList.add("hidden"));
-        // 2. Show selected
         document.getElementById(`tab-${tabName}`).classList.remove("hidden");
 
-        // 3. Update Sidebar Buttons
+        // Reset Sidebar Buttons
         document.querySelectorAll("aside nav button").forEach((btn) => {
           btn.className =
             "w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700";
         });
+        // Active Button
         document.getElementById(`tab-btn-${tabName}`).className =
           "w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors bg-primary text-white shadow-md";
+
+        // Trigger data reload for that tab
+        // This event is caught in dashboard.js
+        const event = new CustomEvent("tab-changed", { detail: tabName });
+        document.dispatchEvent(event);
       };
     </script>
   </body>

@@ -145,110 +145,8 @@
       <div
         class="relative w-full group mt-4 overflow-hidden"
         id="new-release-wrapper"
-      >
-        <div id="new-release-track" class="flex w-max gap-6">
-          <!-- Item 1 -->
-          <div
-            class="relative w-[140px] md:w-[160px] aspect-[2/3] flex-shrink-0 cursor-pointer transition-transform duration-300 hover:scale-101 hover:z-10 hover:shadow-xl rounded-lg overflow-hidden"
-          >
-            <img
-              src="./img/books/mona-eye.jpg"
-              onerror="this.src='https://placehold.co/220x330/112d4e/FFF?text=Book+1'"
-              class="w-full h-full object-cover"
-            />
-          </div>
-          <!-- Item 2 -->
-          <div
-            class="relative w-[140px] md:w-[160px] aspect-[2/3] flex-shrink-0 cursor-pointer transition-transform duration-300 hover:scale-101 hover:z-10 hover:shadow-xl rounded-lg overflow-hidden"
-          >
-            <img
-              src="./img/books/not-give-a-f_ck.png"
-              onerror="this.src='https://placehold.co/220x330/3f72af/FFF?text=Book+2'"
-              class="w-full h-full object-cover"
-            />
-          </div>
-          <!-- Item 3 -->
-          <div
-            class="relative w-[140px] md:w-[160px] aspect-[2/3] flex-shrink-0 cursor-pointer transition-transform duration-300 hover:scale-101 hover:z-10 hover:shadow-xl rounded-lg overflow-hidden"
-          >
-            <img
-              src="./img/books/power-of-poviting.jpg"
-              onerror="this.src='https://placehold.co/220x330/ffc147/112d4e?text=Book+3'"
-              class="w-full h-full object-cover"
-            />
-          </div>
-          <!-- Item 4 -->
-          <div
-            class="relative w-[140px] md:w-[160px] aspect-[2/3] flex-shrink-0 cursor-pointer transition-transform duration-300 hover:scale-101 hover:z-10 hover:shadow-xl rounded-lg overflow-hidden"
-          >
-            <img
-              src="./img/books/harry-potter.jpg"
-              onerror="this.src='https://placehold.co/220x330/222/FFF?text=Book+4'"
-              class="w-full h-full object-cover"
-            />
-          </div>
-          <!-- Item 5 -->
-          <div
-            class="relative w-[140px] md:w-[160px] aspect-[2/3] flex-shrink-0 cursor-pointer transition-transform duration-300 hover:scale-101 hover:z-10 hover:shadow-xl rounded-lg overflow-hidden"
-          >
-            <img
-              src="./img/books/psychology-of-money.webp"
-              onerror="this.src='https://placehold.co/220x330/112d4e/FFF?text=Book+5'"
-              class="w-full h-full object-cover"
-            />
-          </div>
-          <!-- Item 6 -->
-          <div
-            class="relative w-[140px] md:w-[160px] aspect-[2/3] flex-shrink-0 cursor-pointer transition-transform duration-300 hover:scale-101 hover:z-10 hover:shadow-xl rounded-lg overflow-hidden"
-          >
-            <img
-              src="./img/books/hawking.jpg"
-              onerror="this.src='https://placehold.co/220x330/3f72af/FFF?text=Book+6'"
-              class="w-full h-full object-cover"
-            />
-          </div>
-          <!-- Item 7 -->
-          <div
-            class="relative w-[140px] md:w-[160px] aspect-[2/3] flex-shrink-0 cursor-pointer transition-transform duration-300 hover:scale-101 hover:z-10 hover:shadow-xl rounded-lg overflow-hidden"
-          >
-            <img
-              src="./img/books/beyong-the-ocean.jpg"
-              onerror="this.src='https://placehold.co/220x330/ffc147/112d4e?text=Book+7'"
-              class="w-full h-full object-cover"
-            />
-          </div>
-          <!-- Item 8 -->
-          <div
-            class="relative w-[140px] md:w-[160px] aspect-[2/3] flex-shrink-0 cursor-pointer transition-transform duration-300 hover:scale-101 hover:z-10 hover:shadow-xl rounded-lg overflow-hidden"
-          >
-            <img
-              src="./img/books/not-another.webp"
-              onerror="this.src='https://placehold.co/220x330/222/FFF?text=Book+8'"
-              class="w-full h-full object-cover"
-            />
-          </div>
-          <!-- Item 9 -->
-          <div
-            class="relative w-[140px] md:w-[160px] aspect-[2/3] flex-shrink-0 cursor-pointer transition-transform duration-300 hover:scale-101 hover:z-10 hover:shadow-xl rounded-lg overflow-hidden"
-          >
-            <img
-              src="./img/books/the-gril-who-fall.jpg"
-              onerror="this.src='https://placehold.co/220x330/112d4e/FFF?text=Book+9'"
-              class="w-full h-full object-cover"
-            />
-          </div>
-          <!-- Item 10 -->
-          <div
-            class="relative w-[140px] md:w-[160px] aspect-[2/3] flex-shrink-0 cursor-pointer transition-transform duration-300 hover:scale-101 hover:z-10 hover:shadow-xl rounded-lg overflow-hidden"
-          >
-            <img
-              src="./img/books/earth.jpg"
-              onerror="this.src='https://placehold.co/220x330/3f72af/FFF?text=Book+10'"
-              class="w-full h-full object-cover"
-            />
-          </div>
-        </div>
-      </div>
+      ></div>
+      <div id="new-release-track" class="flex w-max gap-6"></div>
     </section>
 
     <!-- Trending Book Section -->
@@ -932,11 +830,8 @@
     <!-- Footer Section -->
     <div id="footer-container"></div>
 
-    <!-- SCRIPTS -->
-    <!-- 1. Load Data First -->
-    <script src="./data/books.js"></script>
-
     <!-- 2. Load Components -->
+    <script type="module" src="./js/home.js"></script>
     <script src="./js/navbar.js"></script>
     <!-- Marquee -->
     <script src="./js/marquee.js"></script>
@@ -950,25 +845,6 @@
 
       // Initialize Footer
       renderFooter("footer-container");
-    </script>
-
-    <script>
-      document.addEventListener("DOMContentLoaded", () => {
-        // Initialize the logic on the track ID
-        initSeamlessMarquee("new-release-track");
-      });
-    </script>
-
-    <!-- Popular book-->
-    <script src="./js/popular-book.js"></script>
-
-    <script>
-      // ... Previous initializations ...
-
-      document.addEventListener("DOMContentLoaded", () => {
-        // ... other inits ...
-        initPopularBooks("popular-books-grid");
-      });
     </script>
 
     <!-- JavaScript for Mobile Menu -->

@@ -1,140 +1,234 @@
 import { Utils, Books } from "./api.js";
 
 // Elements
-const form = document.getElementById("upload-form");
-const categorySelect = document.getElementById("category");
-const coverInput = document.getElementById("cover-file");
-const coverPreview = document.getElementById("cover-preview");
-const coverPlaceholder = document.getElementById("cover-placeholder");
-const pdfInput = document.getElementById("book-file");
-const fileNameDisplay = document.getElementById("file-name-display");
-const submitBtn = document.getElementById("submit-btn");
-const errorMsg = document.getElementById("error-message");
+const els = {
+  form: document.getElementById("upload-form"),
+  catSelect: document.getElementById("category-select"),
+  catInput: document.getElementById("category-input"),
+  toggleCatBtn: document.getElementById("toggle-cat-mode"),
+
+  coverInput: document.getElementById("cover-file"),
+  coverPreview: document.getElementById("cover-preview"),
+  coverPlaceholder: document.getElementById("cover-placeholder"),
+
+  pdfInput: document.getElementById("book-file"),
+  fileNameDisplay: document.getElementById("file-name-display"),
+
+  submitBtn: document.getElementById("submit-btn"),
+  pageTitle: document.getElementById("page-title"),
+  errorMsg: document.getElementById("error-message"),
+  loader: document.getElementById("form-loader"),
+
+  // Hidden fields for edit mode
+  existingCover: document.getElementById("existing-cover"),
+  existingPdf: document.getElementById("existing-pdf"),
+};
+
+// State
+let isEditMode = false;
+let editBookId = null;
+let isNewCategoryMode = false;
 
 // --- INIT ---
 document.addEventListener("DOMContentLoaded", async () => {
-  // 1. Check Permission (Must be Teacher/Admin)
+  // Auth Check
   const role = localStorage.getItem("user_role");
-  // Remember: We mapped 'teacher' to standard users
-  if (role !== "teacher" && role !== "admin") {
-    alert("You must be logged in to upload books.");
+  if (!role || (role !== "teacher" && role !== "admin")) {
+    alert("Access Denied.");
     window.location.href = "../pages/signin.html";
     return;
   }
 
-  // 2. Load Categories
+  // 1. Load Categories
+  await loadCategories();
+
+  // 2. Check for Edit Mode
+  const params = new URLSearchParams(window.location.search);
+  if (params.has("edit")) {
+    isEditMode = true;
+    editBookId = params.get("edit");
+    setupEditMode(editBookId);
+  }
+});
+
+// --- LOAD CATEGORIES ---
+async function loadCategories() {
   try {
     const categories = await Utils.getCategories();
+    els.catSelect.innerHTML =
+      '<option value="" disabled selected>Select a genre</option>';
     if (categories && categories.length > 0) {
-      categorySelect.innerHTML += categories
+      els.catSelect.innerHTML += categories
         .map((cat) => `<option value="${cat.id}">${cat.name}</option>`)
         .join("");
     }
   } catch (err) {
-    console.error("Failed to load categories", err);
+    console.error(err);
   }
-});
+}
 
-// --- UI: IMAGE PREVIEW ---
-coverInput.addEventListener("change", function () {
-  const file = this.files[0];
-  if (file) {
-    const reader = new FileReader();
-    reader.onload = function (e) {
-      coverPreview.src = e.target.result;
-      coverPreview.classList.remove("hidden");
-      coverPlaceholder.classList.add("hidden"); // Hide placeholder text
-    };
-    reader.readAsDataURL(file);
-  }
-});
-
-// --- UI: PDF NAME DISPLAY ---
-pdfInput.addEventListener("change", function () {
-  const file = this.files[0];
-  if (file) {
-    fileNameDisplay.textContent = file.name;
-    fileNameDisplay.classList.add("text-primary", "font-bold");
-  }
-});
-
-// --- SUBMIT HANDLER ---
-form.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  errorMsg.classList.add("hidden");
-
-  // 1. Validate Files
-  const coverFile = coverInput.files[0];
-  const pdfFile = pdfInput.files[0];
-
-  if (!coverFile || !pdfFile) {
-    showError("Please select both a cover image and a PDF file.");
-    return;
-  }
-
-  // 2. Set Loading State
-  const originalText = submitBtn.innerHTML;
-  submitBtn.innerHTML = `<i class="ph-bold ph-spinner animate-spin"></i> Uploading Files...`;
-  submitBtn.disabled = true;
+// --- SETUP EDIT MODE ---
+async function setupEditMode(id) {
+  els.pageTitle.textContent = "Edit Book";
+  els.submitBtn.innerHTML = `<i class="ph-bold ph-pencil"></i> Update Book`;
+  els.loader.classList.remove("hidden");
 
   try {
-    // 3. Upload Cover Image
-    // Create FormData specifically for the file endpoint
-    const coverFormData = new FormData();
-    coverFormData.append("file", coverFile);
+    const book = await Books.getById(id);
 
-    console.log("Uploading Cover...");
-    const coverResponse = await Utils.uploadFile(coverFormData);
-    // API returns the URL string directly or inside an object?
-    // Based on swagger logs: Body: "string".
-    // Let's handle both cases safely.
-    const coverUrl =
-      typeof coverResponse === "string"
-        ? coverResponse
-        : coverResponse.url || coverResponse.file_url;
+    // Fill Form
+    document.getElementById("title").value = book.title;
+    document.getElementById("description").value = book.description;
 
-    // 4. Upload PDF
-    submitBtn.innerHTML = `<i class="ph-bold ph-spinner animate-spin"></i> Uploading PDF...`;
-    const pdfFormData = new FormData();
-    pdfFormData.append("file", pdfFile);
-
-    console.log("Uploading PDF...");
-    const pdfResponse = await Utils.uploadFile(pdfFormData);
-    const pdfUrl =
-      typeof pdfResponse === "string"
-        ? pdfResponse
-        : pdfResponse.url || pdfResponse.file_url;
-
-    if (!coverUrl || !pdfUrl) {
-      throw new Error("Failed to retrieve file URLs from server.");
+    // Handle Category
+    // Assumption: book.categories is array of objects. We take first one.
+    if (book.categories && book.categories.length > 0) {
+      els.catSelect.value = book.categories[0].id;
     }
 
-    // 5. Create Book Entry
-    submitBtn.innerHTML = `<i class="ph-bold ph-spinner animate-spin"></i> Publishing...`;
-
-    const bookData = {
-      title: document.getElementById("title").value,
-      description: document.getElementById("description").value,
-      category_ids: [parseInt(categorySelect.value)], // API expects array of INT
-      thumbnail: coverUrl,
-      file_url: pdfUrl,
-    };
-
-    console.log("Creating Book:", bookData);
-    await Books.create(bookData);
-
-    // 6. Success
-    alert("Book published successfully!");
-    window.location.href = "dashboard.html"; // Redirect to dashboard
+    // Fill Images/Files (Visual only)
+    if (book.thumbnail) {
+      els.coverPreview.src = book.thumbnail;
+      els.coverPreview.classList.remove("hidden");
+      els.coverPlaceholder.classList.add("hidden");
+      els.existingCover.value = book.thumbnail;
+    }
+    if (book.file_url) {
+      els.fileNameDisplay.textContent = "Current PDF Loaded";
+      els.existingPdf.value = book.file_url;
+    }
   } catch (error) {
-    console.error("Upload Error:", error);
-    showError(error.message || "An error occurred during upload.");
-    submitBtn.innerHTML = originalText;
-    submitBtn.disabled = false;
+    alert("Failed to load book data.");
+  } finally {
+    els.loader.classList.add("hidden");
+  }
+}
+
+// --- CATEGORY TOGGLE LOGIC ---
+els.toggleCatBtn.addEventListener("click", () => {
+  isNewCategoryMode = !isNewCategoryMode;
+  if (isNewCategoryMode) {
+    els.catSelect.classList.add("hidden");
+    els.catSelect.disabled = true;
+    els.catInput.classList.remove("hidden");
+    els.catInput.disabled = false;
+    els.toggleCatBtn.textContent = "Cancel (Select Existing)";
+  } else {
+    els.catSelect.classList.remove("hidden");
+    els.catSelect.disabled = false;
+    els.catInput.classList.add("hidden");
+    els.catInput.disabled = true;
+    els.toggleCatBtn.textContent = "+ Create New";
   }
 });
 
-function showError(msg) {
-  errorMsg.innerHTML = `<i class="ph-bold ph-warning-circle"></i> <span>${msg}</span>`;
-  errorMsg.classList.remove("hidden");
-}
+// --- SUBMIT LOGIC ---
+els.form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  els.errorMsg.classList.add("hidden");
+  els.loader.classList.remove("hidden");
+
+  try {
+    // 1. Handle Category
+    let finalCategoryId = els.catSelect.value;
+
+    if (isNewCategoryMode) {
+      const newCatName = els.catInput.value;
+      if (!newCatName) throw new Error("Please enter a category name.");
+
+      // Create Category via API (assuming POST /categories works)
+      // Note: Check api.js if you have a method for this. If not, use raw fetch.
+      // Using raw fetch here for safety based on your provided file list
+      const token = localStorage.getItem("access_token");
+      const catRes = await fetch(
+        "https://stem-api.anajak-khmer.site/categories/",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            name: newCatName,
+            description: "User created",
+          }),
+        }
+      );
+      if (!catRes.ok) throw new Error("Failed to create category");
+      const newCat = await catRes.json();
+      finalCategoryId = newCat.id;
+    }
+
+    // 2. Handle Files
+    let coverUrl = els.existingCover.value;
+    let pdfUrl = els.existingPdf.value;
+
+    // Upload Cover if changed
+    if (els.coverInput.files.length > 0) {
+      const formData = new FormData();
+      formData.append("file", els.coverInput.files[0]);
+      const res = await Utils.uploadFile(formData);
+      coverUrl = typeof res === "string" ? res : res.url || res.file_url;
+    }
+
+    // Upload PDF if changed
+    if (els.pdfInput.files.length > 0) {
+      const formData = new FormData();
+      formData.append("file", els.pdfInput.files[0]);
+      const res = await Utils.uploadFile(formData);
+      pdfUrl = typeof res === "string" ? res : res.url || res.file_url;
+    }
+
+    // Validation for Create Mode
+    if (!isEditMode && (!coverUrl || !pdfUrl)) {
+      throw new Error("Cover image and PDF are required.");
+    }
+
+    // 3. Prepare Payload
+    const payload = {
+      title: document.getElementById("title").value,
+      description: document.getElementById("description").value,
+      category_ids: [parseInt(finalCategoryId)],
+      thumbnail: coverUrl,
+      file_url: pdfUrl,
+      metadata: "{}",
+    };
+
+    // 4. Send Request (Create or Update)
+    if (isEditMode) {
+      await Books.update(editBookId, payload); // Ensure api.js has update()
+      alert("Book Updated Successfully!");
+    } else {
+      await Books.create(payload);
+      alert("Book Published Successfully!");
+    }
+
+    window.location.href = "dashboard.html";
+  } catch (error) {
+    console.error(error);
+    els.errorMsg.textContent = error.message || "Operation failed.";
+    els.errorMsg.classList.remove("hidden");
+  } finally {
+    els.loader.classList.add("hidden");
+  }
+});
+
+// --- UI HELPERS ---
+els.coverInput.addEventListener("change", function () {
+  if (this.files && this.files[0]) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      els.coverPreview.src = e.target.result;
+      els.coverPreview.classList.remove("hidden");
+      els.coverPlaceholder.classList.add("hidden");
+    };
+    reader.readAsDataURL(this.files[0]);
+  }
+});
+
+els.pdfInput.addEventListener("change", function () {
+  if (this.files && this.files[0]) {
+    els.fileNameDisplay.textContent = this.files[0].name;
+    els.fileNameDisplay.className = "text-primary font-bold px-2";
+  }
+});

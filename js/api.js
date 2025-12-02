@@ -1,8 +1,4 @@
-/**
- * LibreShelf API Service Helper (src/js/api.js)
- * Handles fetching, authentication, token, and role management.
- * NOTE: Assumes Teacher/Admin roles are the ONLY ones allowed to create content.
- */
+// Handles fetching, authentication, token, and role management.
 
 const API_BASE_URL = "https://stem-api.anajak-khmer.site";
 
@@ -26,17 +22,12 @@ function setRole(role) {
 function removeAuth() {
   localStorage.removeItem("access_token");
   localStorage.removeItem("user_role");
-  // You can also add other user data here if needed (e.g., user_id)
+  localStorage.removeItem("user_avatar");
+  localStorage.removeItem("user_name");
+  localStorage.removeItem("user_id");
 }
 
-// --- CORE FETCH FUNCTION ---
-
-/**
- * Executes a protected API request (requires a valid token).
- * @param {string} endpoint - The API route (e.g., '/books')
- * @param {string} method - HTTP method (GET, POST, PATCH, DELETE)
- * @param {object} [body] - Optional request body data
- */
+// Fetching Data Core Function
 async function protectedRequest(endpoint, method = "GET", body = null) {
   const token = getToken();
   if (!token) {
@@ -75,16 +66,10 @@ async function protectedRequest(endpoint, method = "GET", body = null) {
   return response.json();
 }
 
-// --- UTILITIES (Used by Auth and other sections) ---
+// Used by Auth and other sections
 export const Utils = {
-  // Fetches profile to get the user role
-  // ... other utils ...
-  // ...
   async getMyProfile() {
     return protectedRequest("/users/me", "GET");
-  },
-  async checkAdminStatus() {
-    return protectedRequest("/auth/admin-only", "GET");
   },
 
   // Fetches all categories
@@ -122,7 +107,7 @@ export const Utils = {
   },
 };
 
-// --- API CATEGORY: AUTHENTICATION ---
+// API Categories Auth
 export const Auth = {
   async login(identifier, password) {
     const response = await fetch(`${API_BASE_URL}/auth/login`, {
@@ -133,10 +118,7 @@ export const Auth = {
     const data = await response.json();
 
     if (response.ok) {
-      // 1. Save Token
       setToken(data.access_token);
-
-      // 2. Fetch Profile immediately to get the Role
       try {
         // Fetch Profile to get Role, ID, Name, and Avatar
         const profile = await Utils.getMyProfile();
@@ -174,7 +156,7 @@ export const Auth = {
   // Clear all auth data
   logout: () => {
     removeAuth();
-    localStorage.removeItem("user_name"); // --- NEW LINE: Clear name on logout
+    localStorage.removeItem("user_name");
     window.location.href = "/";
   },
 
@@ -196,40 +178,39 @@ export const Auth = {
   },
 };
 
-// --- API CATEGORY: BOOKS ---
+// API Categories Book
 export const Books = {
-  // PUBLIC: Get all books (used for homepage and browsing)
   async getAll({ page = 1, limit = 20, search = "", category_id = null } = {}) {
-    // 1. Filter out empty values to avoid validation errors (e.g. sending category_id='')
+    // Filter out empty values to avoid validation errors (e.g. sending category_id='')
     const params = { page, limit };
     if (search) params.search = search;
     if (category_id) params.category_id = category_id;
 
     const query = new URLSearchParams(params);
-    // 2. Added trailing slash as per your fix
+    // Added trailing slash as per your fix
     const url = `/books/?${query.toString()}`;
 
     const response = await fetch(`${API_BASE_URL}${url}`);
     if (!response.ok) throw new Error("Failed to fetch books.");
-    return response.json(); // returns { total, page, limit, books }
+    return response.json();
   },
 
-  // PUBLIC: Get single book details
+  // Get a single book detail
   async getById(bookId) {
     const response = await fetch(`${API_BASE_URL}/books/${bookId}`);
     if (!response.ok) throw new Error("Book not found.");
     return response.json();
   },
 
-  // TEACHER/ADMIN ONLY: Create book
+  // Create a book
   async create(bookData) {
     return protectedRequest("/books/", "POST", bookData);
   },
-  // TEACHER/ADMIN ONLY: Update book
+  // Update a book
   async update(bookId, bookData) {
     return protectedRequest(`/books/${bookId}`, "PATCH", bookData);
   },
-  // TEACHER/ADMIN ONLY: Delete book
+  // Delete a book
   async delete(bookId) {
     return protectedRequest(`/books/${bookId}`, "DELETE");
   },
@@ -256,5 +237,24 @@ export const Categories = {
   // Delete a category (Admin only)
   async delete(id) {
     return protectedRequest(`/categories/${id}`, "DELETE");
+  },
+
+  // Bookmarks
+  async getBookmarks() {
+    return protectedRequest("/books/bookmark/me/", "GET");
+  },
+  async addBookmark(bookId) {
+    return protectedRequest("/books/bookmark/", "POST", { book_id: bookId });
+  }, // Check logic if body needed
+  async removeBookmark(bookId) {
+    return protectedRequest(`/books/bookmark/${bookId}/`, "DELETE");
+  },
+
+  // Reports
+  async report(bookId, reason) {
+    return protectedRequest("/books/report/", "POST", {
+      book_id: bookId,
+      reason: reason,
+    });
   },
 };
