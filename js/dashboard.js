@@ -96,7 +96,7 @@ async function saveProfileAvatar(url) {
   };
 
   const res = await fetch(
-    `https://stem-api.anajak-khmer.site/users/${userId}/`,
+    `https://stem-api.anajak-khmer.site/users/${userId}`,
     {
       method: "PATCH",
       headers: {
@@ -132,7 +132,7 @@ els.form.addEventListener("submit", async (e) => {
   try {
     const token = localStorage.getItem("access_token");
     const res = await fetch(
-      `https://stem-api.anajak-khmer.site/users/${userId}/`,
+      `https://stem-api.anajak-khmer.site/users/${userId}`,
       {
         method: "PATCH",
         headers: {
@@ -235,6 +235,7 @@ async function loadFavorites() {
     '<p class="col-span-full text-center py-8 text-gray-500">Loading favorites...</p>';
 
   try {
+    // 1. Get the Bookmark IDs
     const bookmarks = await Books.getBookmarks();
 
     if (!bookmarks || bookmarks.length === 0) {
@@ -242,20 +243,57 @@ async function loadFavorites() {
       return;
     }
 
-    els.favGrid.innerHTML = bookmarks
+    // 2. Extract just the book_ids into a Set for easy lookup
+    // The API returns [{id: 1, book_id: 5, user_id: 2}, ...]
+    const bookIds = new Set(bookmarks.map((b) => b.book_id));
+
+    // 3. Fetch actual Book Details
+    // Strategy: Fetch all books and filter.
+    // (If your library is huge, you would fetch individually, but this is efficient for <100 books)
+    const response = await Books.getAll({ limit: 100 });
+    const allBooks = response.books || response.data || [];
+
+    // 4. Match Books to Bookmarks
+    const favoriteBooks = allBooks.filter((book) => bookIds.has(book.id));
+
+    // 5. Render
+    if (favoriteBooks.length === 0) {
+      els.favGrid.innerHTML =
+        '<p class="col-span-full text-center text-red-400">Found bookmarks, but could not load book details.</p>';
+      return;
+    }
+
+    els.favGrid.innerHTML = favoriteBooks
       .map(
         (book) => `
-            <div class="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-slate-700 flex gap-4">
-                <a href="detail.html?id=${book.id}" class="flex-shrink-0"><img src="${book.thumbnail}" class="w-16 h-24 object-cover rounded"></a>
-                <div class="flex-1">
-                    <a href="detail.html?id=${book.id}" class="font-bold text-primary dark:text-white line-clamp-1 hover:text-accent">${book.title}</a>
-                    <button onclick="removeFav(${book.id})" class="text-xs text-red-500 hover:text-red-600 mt-2"><i class="ph-bold ph-heart-break"></i> Remove</button>
-                </div>
+        <div class="bg-white dark:bg-slate-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-slate-700 flex gap-4">
+            <a href="detail.html?id=${book.id}" class="flex-shrink-0">
+                <img src="${
+                  book.thumbnail || "https://placehold.co/100"
+                }" class="w-16 h-24 object-cover rounded">
+            </a>
+            <div class="flex-1">
+                <a href="detail.html?id=${
+                  book.id
+                }" class="font-bold text-primary dark:text-white line-clamp-1 hover:text-accent">
+                    ${book.title}
+                </a>
+                <p class="text-xs text-gray-500 mb-2">${
+                  book.author || "Unknown"
+                }</p>
+                
+                <button onclick="removeFav(${
+                  book.id
+                })" class="text-xs text-red-500 hover:text-red-600 flex items-center gap-1">
+                    <i class="ph-bold ph-heart-break"></i> Remove
+                </button>
             </div>
-        `
+        </div>
+    `
       )
       .join("");
   } catch (error) {
+    console.error("Fav Load Error:", error);
     els.favGrid.innerHTML =
       '<p class="text-red-500 text-center">Failed to load favorites.</p>';
   }

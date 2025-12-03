@@ -24,6 +24,21 @@ const clearFilterBtn = document.getElementById("clear-filters");
 // --- 1. INITIALIZE ---
 async function init() {
   await loadCategories();
+  const params = new URLSearchParams(window.location.search);
+
+  if (params.has("search")) {
+    state.search = params.get("search");
+    // Pre-fill the search input on the categories page so user knows
+    if (searchInput) searchInput.value = state.search;
+  }
+
+  if (params.has("category")) {
+    state.categoryId = params.get("category");
+  }
+
+  loadBooks(true); // Initial load with the new state
+  setupEvents();
+  setupInfiniteScroll();
   loadBooks(true); // Initial load
   setupEvents();
   setupInfiniteScroll();
