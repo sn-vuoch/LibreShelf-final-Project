@@ -57,19 +57,29 @@
             </h1>
 
             <!-- Search Bar Container -->
-            <div class="mt-8 max-w-lg mx-auto lg:mx-0 relative">
-              <!-- Input Field -->
+            <div
+              id="search-wrapper"
+              class="mt-8 max-w-lg mx-auto lg:mx-0 relative"
+            >
               <input
+                id="hero-search-input"
                 type="text"
                 placeholder="Search by Title, Author, or ISBN..."
+                autocomplete="off"
                 class="w-full pl-6 pr-32 py-4 rounded-full text-text-black focus:outline-none focus:ring-4 focus:ring-secondary/50 shadow-xl placeholder-gray-400 text-base bg-white"
               />
-              <!-- Search Button (Inside Input) -->
+
               <button
+                id="hero-search-btn"
                 class="absolute right-2 top-2 bottom-2 bg-secondary hover:bg-blue-400 text-pure-white font-bold py-2 px-6 rounded-full transition-all duration-200 flex items-center gap-2"
               >
                 Search
               </button>
+
+              <div
+                id="hero-search-dropdown"
+                class="absolute left-6 right-6 top-full mt-2 bg-white dark:bg-slate-800 rounded-xl shadow-2xl border border-gray-100 dark:border-slate-700 overflow-hidden hidden z-50 max-h-[400px] overflow-y-auto"
+              ></div>
             </div>
 
             <!-- Subtext -->
@@ -173,7 +183,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <!-- CARD 1 -->
           <div
-          data-aos="zoom-out-right"
+            data-aos="zoom-out-right"
             class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow flex flex-col sm:flex-row gap-6 items-start dark:bg-slate-800 dark:border-slate-700"
           >
             <!-- Left: Book Cover (Fixed Width) -->
@@ -240,7 +250,7 @@
                   <i class="ph-bold ph-heart text-xl"></i>
                 </button>
                 <a
-                  href="#"
+                  href="/pages/detail.html?id=5"
                   class="px-5 py-2 bg-primary text-pure-white text-sm font-bold rounded-lg hover:bg-secondary transition shadow-md flex items-center gap-2"
                 >
                   Read Now <i class="ph-bold ph-book-open"></i>
@@ -251,7 +261,7 @@
 
           <!-- CARD 2 -->
           <div
-          data-aos="zoom-out-left"
+            data-aos="zoom-out-left"
             class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow flex flex-col sm:flex-row gap-6 items-start dark:bg-slate-800 dark:border-slate-700"
           >
             <!-- Left: Book Cover -->
@@ -318,7 +328,7 @@
                   <i class="ph-bold ph-heart text-xl"></i>
                 </button>
                 <a
-                  href="#"
+                  href="/pages/detail.html?id=2"
                   class="px-5 py-2 bg-primary text-pure-white text-sm font-bold rounded-lg hover:bg-secondary transition shadow-md flex items-center gap-2"
                 >
                   Read Now <i class="ph-bold ph-book-open"></i>
@@ -672,21 +682,21 @@
                 type="text"
                 placeholder="Enter your name "
                 required
-                class="w-full px-4 py-3 border border-light-gray rounded-lg focus:ring-secondary focus:border-secondary transition text-sm text-text-black placeholder-dark-gray"
+                class="w-full px-4 py-3 border border-light-gray rounded-lg focus:ring-secondary focus:border-secondary transition text-sm text-text-black dark:text-white placeholder-dark-gray"
               />
 
               <input
                 type="email"
                 placeholder="Enter your email"
                 required
-                class="w-full px-4 py-3 border border-light-gray rounded-lg focus:ring-secondary focus:border-secondary transition text-sm text-text-black placeholder-dark-gray"
+                class="w-full px-4 py-3 border border-light-gray rounded-lg focus:ring-secondary focus:border-secondary transition text-sm text-text-black dark:text-white placeholder-dark-gray"
               />
 
               <textarea
                 placeholder="Enter your review message..."
                 rows="4"
                 required
-                class="w-full px-4 py-3 border border-light-gray rounded-lg focus:ring-secondary focus:border-secondary transition text-sm text-text-black placeholder-dark-gray resize-none flex-grow"
+                class="w-full px-4 py-3 border border-light-gray rounded-lg focus:ring-secondary focus:border-secondary transition text-sm text-text-black dark:text-white placeholder-dark-gray resize-none flex-grow"
               ></textarea>
 
               <button
@@ -833,12 +843,11 @@
     <!-- Footer Section -->
     <div id="footer-container"></div>
 
-    <!-- 2. Load Components -->
+    <!-- Load Components -->
     <script type="module" src="./js/home.js"></script>
+    <script type="module" src="./js/search.js"></script>
+    
     <script src="./js/navbar.js"></script>
-    <!-- Marquee -->
-    <script src="./js/marquee.js"></script>
-
     <script src="./js/footer.js"></script>
 
     <!-- 3. Initialize -->
