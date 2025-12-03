@@ -94,7 +94,7 @@ function renderNavbar(containerId, activePage = "") {
                 <a href="${pathPrefix}/index.html" class="flex-shrink-0 flex items-center gap-2 cursor-pointer decoration-0">
                    <!-- Ensure images folder is accessible -->
                    <img src="${pathPrefix}/img/Libreshelf.png" class="w-15 md:w-20 dark:hidden" alt="Light Logo">
-                   <img src="${pathPrefix}/img/Libreshelf-dark-mode.png" class="w-15 md:w-20 hidden dark:block" alt="Dark Logo">
+                   <img  src="${pathPrefix}/img/white logo.png" class="w-15 md:w-20  hidden dark:block" alt="Dark Logo">
                 </a>
 
                 <!-- DESKTOP MENU -->

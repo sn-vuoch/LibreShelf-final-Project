@@ -139,7 +139,7 @@ function createCardHTML(book) {
                     </h3>
                 </a>
                 
-                <p class="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 mb-3 h-8">
+                <p class="text-xs text-primary dark:text-white line-clamp-2 mb-3 h-8">
                     ${desc}
                 </p>
 
