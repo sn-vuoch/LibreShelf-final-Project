@@ -21,11 +21,21 @@ document.addEventListener("DOMContentLoaded", async () => {
     const profile = await Utils.getMyProfile();
     renderProfile(profile);
 
-    // Listen for tab changes to load data
+    //  Setup Event Listener for future clicks
     document.addEventListener("tab-changed", (e) => {
       if (e.detail === "books") loadUserBooks(profile.id);
       if (e.detail === "favorites") loadFavorites();
     });
+
+    // FORCE INITIAL LOAD based on URL Hash (Fixes the bug)
+    // We check the hash manually because we missed the initial event while waiting for profile
+    const hash = window.location.hash;
+    if (hash === "#favorites") {
+        loadFavorites();
+    } else if (hash === "#books") {
+        loadUserBooks(profile.id);
+    }
+
   } catch (error) {
     console.error("Dashboard Auth Error:", error);
     window.location.href = "signin.html";

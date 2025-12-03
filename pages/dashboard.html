@@ -270,11 +270,23 @@
         document.getElementById(`tab-btn-${tabName}`).className =
           "w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors bg-primary text-white shadow-md";
 
-        // Trigger data reload for that tab
-        // This event is caught in dashboard.js
+        // Trigger data reload
         const event = new CustomEvent("tab-changed", { detail: tabName });
         document.dispatchEvent(event);
       };
+
+      // --- ADD THIS BLOCK ---
+      // Check URL hash on load (e.g. #favorites)
+      window.addEventListener("DOMContentLoaded", () => {
+        if (window.location.hash === "#favorites") {
+          switchTab("favorites");
+        } else if (window.location.hash === "#books") {
+          switchTab("books");
+        } else {
+          // Default to profile
+          switchTab("profile");
+        }
+      });
     </script>
   </body>
 </html>

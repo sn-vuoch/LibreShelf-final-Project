@@ -115,7 +115,7 @@ function renderNavbar(containerId, activePage = "") {
 
                     <!-- 2. Heart (Favorites) -->
                     <!-- TODO: Implement popup later -->
-                    <button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-slate-800 text-dark-gray hover:text-red-500 dark:text-gray-300 transition-colors relative">
+                    <button id="nav-heart-btn" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-slate-800 text-dark-gray hover:text-red-500 dark:text-gray-300 transition-colors relative">
                         <i class="ph ph-heart text-2xl"></i>
                     </button>
                     
@@ -162,7 +162,7 @@ function renderNavbar(containerId, activePage = "") {
       ? "bg-gray-50 dark:bg-slate-800 text-primary dark:text-accent font-bold"
       : "text-primary dark:text-gray-300 hover:bg-gray-50 "
   }">About Us</a>
-                <a href="${pathPrefix}/pages/my-book.html" class="block px-4 py-2 rounded-lg ${
+                <a href="${pathPrefix}/pages/book.html" class="block px-4 py-2 rounded-lg ${
     activePage === "mybook"
       ? "bg-gray-50 dark:bg-slate-800 text-primary dark:text-accent font-bold"
       : "text-primary dark:text-gray-300 hover:bg-gray-50"
@@ -175,7 +175,7 @@ function renderNavbar(containerId, activePage = "") {
                         <i class="ph ph-moon text-xl"></i> <span>Dark Mode</span>
                     </button>
                     <!-- Mobile Heart -->
-                    <button class="flex items-center gap-2 text-text-black dark:text-gray-300">
+                    <button id="mobile-heart-btn" class="flex items-center gap-2 text-text-black dark:text-gray-300">
                         <i class="ph ph-heart text-xl"></i> <span>Favorites</span>
                     </button>
                 </div>
@@ -267,4 +267,21 @@ function renderNavbar(containerId, activePage = "") {
 
   if (toggleBtn) toggleBtn.addEventListener("click", handleToggle);
   if (mobileToggleBtn) mobileToggleBtn.addEventListener("click", handleToggle);
+
+  // 5. HEART CLICK LOGIC (NEW)
+  const handleHeartClick = () => {
+    if (isLoggedIn) {
+      // Redirect to Dashboard with hash #favorites
+      window.location.href = `${pathPrefix}/pages/dashboard.html#favorites`;
+    } else {
+      // Redirect to Sign In
+      window.location.href = `${pathPrefix}/pages/signin.html`;
+    }
+  };
+
+  const desktopHeart = document.getElementById("nav-heart-btn");
+  const mobileHeart = document.getElementById("mobile-heart-btn");
+
+  if (desktopHeart) desktopHeart.addEventListener("click", handleHeartClick);
+  if (mobileHeart) mobileHeart.addEventListener("click", handleHeartClick);
 }
