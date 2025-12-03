@@ -1,6 +1,7 @@
 ------------------------------------
 Node / Development Dependencies
 ------------------------------------
+node_modules/
 
 Logs and Lock Files
 npm-debug.log
@@ -16,6 +17,7 @@ build/
 .cache/
 
 Tailwind CSS Generated Output
+src/output.css
 
 ------------------------------------
 OS & Editor Files
