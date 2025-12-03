@@ -6,496 +6,61 @@
     <title>View History | LIBRESHELF</title>
     <link href="../src/output.css" rel="stylesheet" />
 
-    <!-- AOS -->
-  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" />
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" />
 
-    <!-- Icons links -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <link
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
     />
-    <style>
-      /* Configure Tailwind to use Poppins for the sans font family */
-      :root {
-        --tw-font-sans: "Poppins", sans-serif;
-      }
-      body {
-        font-family: var(--tw-font-sans);
-        background-color: #f7f9fc; /* Light background for the body */
-      }
-      /* Custom styles for the cover image placeholder */
-      .book-cover {
-        width: 80px;
-        height: 120px;
-        object-fit: cover;
-        border-radius: 4px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      }
-      .filter-select {
-        appearance: none;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='currentColor'%3E%3Cpath fill-rule='evenodd' d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z' clip-rule='evenodd' /%3E%3C/svg%3E");
-        background-repeat: no-repeat;
-        background-position: right 0.5rem center;
-        background-size: 1.5em 1.5em;
-      }
-    </style>
+
     <script src="../js/theme.js"></script>
   </head>
-  <body class="min-h-screen">
-    <!-- Navigation bar -->
+  <body
+    class="min-h-screen bg-gray-50 dark:bg-slate-900 font-primary text-text-black dark:text-gray-100 flex flex-col"
+  >
     <div id="navbar-container"></div>
 
-    <!-- Main Content Area -->
-    <main class=" w-full px-4 sm:px-6 lg:px-8 py-8  dark:bg-slate-900">
-      <h1
-        class="text-2xl sm:text-3xl font-semibold text-gray-900 mb-6 border-b pb-2"
-      >
-        View history
-      </h1>
-
-      <!-- Filters Section -->
+    <main
+      class="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow"
+    >
       <div
-        class="mb-8 p-4 bg-white rounded-lg shadow-sm border border-gray-200 dark:bg-slate-900"
+        class="flex flex-col sm:flex-row sm:items-center justify-between mb-6 border-b border-gray-200 dark:border-slate-700 pb-4"
       >
-        <div
-          class="flex sm:flex-row sm:items-center justify-between space-y-4 sm:space-y-0"
+        <h1
+          class="text-2xl sm:text-3xl font-semibold text-primary dark:text-white"
         >
-          <!-- Filter Group -->
-          <div class="flex flex-wrap items-center gap-4 dark:text-white  ">
-            <label for="filter-all" class="text-sm font-medium text-gray-700 dark:text-white "
-                        >Filter</label>
-            <select
-              id="filter-all"
-              class="filter-select block w-full sm:w-auto pl-3 pr-10 py-2  text-base border-gray-300 focus:outline-none  sm:text-sm rounded-md shadow-sm dark:bg-primary dark:border dark:border-white"
-            > 
-              <option>All</option>
-              <option>Started</option>
-              <option>Finished</option>
-            </select>
+          View History
+        </h1>
 
-            <label for="sort-recent" class="text-sm font-medium text-gray-700 dark:text-white"
-              >Sort :</label
-            >
-            <select
-              id="sort-recent"
-              class="filter-select block w-full sm:w-auto pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none dark:bg-primary dark:border dark:border-white sm:text-sm rounded-md shadow-sm"
-            >
-              <option class="">Recent</option>
-              <option>Oldest</option>
-              <option>Title (A-Z)</option>
-            </select>
-          </div>
-
-          <!-- Clear All Button -->
-          <button
-            class="text-sm  text-primary dark:text-white  font-medium transition duration-150 ease-in-out sm:self-center"
-          >
-            Clear All
-          </button>
-        </div>
+        <button
+          class="mt-4 sm:mt-0 text-sm text-red-500 hover:text-red-700 font-medium transition duration-150 ease-in-out flex items-center gap-2"
+        >
+          <i class="ph-bold ph-trash"></i> Clear All
+        </button>
       </div>
 
-      <!-- History List -->
-      <div class="space-y-5">
-        <!-- Group: Today -->
-        <section>
-          <h2 class="text-lg font-semibold text-gray-800 mb-4 border-b pb-2 dark:text-pure-white">
-            Today
-          </h2>
-
-          <!-- History Item 1 -->
-          <div
-          data-aos="zoom-in"
-            data-aos="zoom-in"
-            class="history-item bg-white p-4 sm:p-6 rounded-xl shadow-lg hover:shadow-xl transition duration-300 mb-4 flex flex-col md:flex-row items-start md:items-center justify-between space-y-4 md:space-y-0 md:space-x-6 border border-gray-100 dark:bg-primary"
-          >
-            <!-- Book Details (Image, Title, Info) -->
-            <div class="flex items-start flex-grow">
-              <img
-                class="book-cover mr-4"
-                src="https://placehold.co/80x120/1f2937/ffffff?text=Book+Cover"
-                onerror="this.onerror=null;this.src='https://placehold.co/80x120/1f2937/ffffff?text=Book+Cover';"
-                alt="Guns, Germs, And Steel"
-              />
-
-              <div>
-                <h3 class="text-lg font-semibold text-gray-900 leading-snug dark:text-white">
-                  Guns, Germs, And Steel
-                </h3>
-                <p class="text-sm text-primary dark:text-gray-400 mt-1">Adventure | Horror</p>
-                <p class="text-xs text-gray-600 mt-1 dark:text-gray-400">
-                  Viewed:
-                  <span class="font-medium text-gray-600 dark:text-gray-400">11:11 PM</span>
-                </p>
-                <p class="text-xs dark:text-gray-400 text-gray-600">
-                  Date:
-                  <span class="font-medium text-gray-600 dark:text-gray-400 "
-                    >19 November 2025</span
-                  >
-                </p>
-                <p class="text-xs text-gray-600 mt-2 italic dark:text-gray-400">Jared Diamond</p>
-              </div>
-            </div>
-
-            <!-- Actions (Continue Reading, Delete) -->
-            <div class="flex items-center space-x-4 self-end md:self-center">
-              <button
-                class="px-4 py-2 text-sm font-medium border text-primary border-primary  rounded-lg transition duration-150 ease-in-out w-full md:w-auto whitespace-nowrap dark:text-white dark:border-white "
-              >
-                Continue Reading
-              </button>
-              <button
-                class="text-gray-400 hover:text-red-500 p-2 rounded-full transition duration-150 ease-in-out"
-              >
-                <svg
-                  class="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                  ></path>
-                </svg>
-              </button>
-            </div>
-          </div>
-
-     <div
-            data-aos="zoom-in"
-            class="history-item bg-white p-4 sm:p-6 rounded-xl shadow-lg hover:shadow-xl transition duration-300 mb-4 flex flex-col md:flex-row items-start md:items-center justify-between space-y-4 md:space-y-0 md:space-x-6 border border-gray-100 dark:bg-primary"
-          >
-            <!-- Book Details (Image, Title, Info) -->
-            <div class="flex items-start flex-grow">
-              <img
-                class="book-cover mr-4"
-                src="https://placehold.co/80x120/1f2937/ffffff?text=Book+Cover"
-                onerror="this.onerror=null;this.src='https://placehold.co/80x120/1f2937/ffffff?text=Book+Cover';"
-                alt="Guns, Germs, And Steel"
-              />
-
-              <div>
-                <h3 class="text-lg font-semibold text-gray-900 leading-snug dark:text-white">
-                  Guns, Germs, And Steel
-                </h3>
-                <p class="text-sm text-primary dark:text-gray-400 mt-1">Adventure | Horror</p>
-                <p class="text-xs text-gray-600 mt-1 dark:text-gray-400">
-                  Viewed:
-                  <span class="font-medium text-gray-600 dark:text-gray-400">11:11 PM</span>
-                </p>
-                <p class="text-xs dark:text-gray-400 text-gray-600">
-                  Date:
-                  <span class="font-medium text-gray-600 dark:text-gray-400 "
-                    >19 November 2025</span
-                  >
-                </p>
-                <p class="text-xs text-gray-600 mt-2 italic dark:text-gray-400">Jared Diamond</p>
-              </div>
-            </div>
-
-            <!-- Actions (Continue Reading, Delete) -->
-            <div class="flex items-center space-x-4 self-end md:self-center">
-              <button
-                class="px-4 py-2 text-sm font-medium border text-primary border-primary  rounded-lg transition duration-150 ease-in-out w-full md:w-auto whitespace-nowrap dark:text-white dark:border-white "
-              >
-                Continue Reading
-              </button>
-              <button
-                class="text-gray-400 hover:text-red-500 p-2 rounded-full transition duration-150 ease-in-out"
-              >
-                <svg
-                  class="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                  ></path>
-                </svg>
-              </button>
-            </div>
-          </div>
-
-          <!-- History Item 2 (Duplicate for layout replication) -->
-               <div
-            data-aos="zoom-in"
-            class="history-item bg-white p-4 sm:p-6 rounded-xl shadow-lg hover:shadow-xl transition duration-300 mb-4 flex flex-col md:flex-row items-start md:items-center justify-between space-y-4 md:space-y-0 md:space-x-6 border border-gray-100 dark:bg-primary"
-          >
-            <!-- Book Details (Image, Title, Info) -->
-            <div class="flex items-start flex-grow">
-              <img
-                class="book-cover mr-4"
-                src="https://placehold.co/80x120/1f2937/ffffff?text=Book+Cover"
-                onerror="this.onerror=null;this.src='https://placehold.co/80x120/1f2937/ffffff?text=Book+Cover';"
-                alt="Guns, Germs, And Steel"
-              />
-
-              <div>
-                <h3 class="text-lg font-semibold text-gray-900 leading-snug dark:text-white">
-                  Guns, Germs, And Steel
-                </h3>
-                <p class="text-sm text-primary dark:text-gray-400 mt-1">Adventure | Horror</p>
-                <p class="text-xs text-gray-600 mt-1 dark:text-gray-400">
-                  Viewed:
-                  <span class="font-medium text-gray-600 dark:text-gray-400">11:11 PM</span>
-                </p>
-                <p class="text-xs dark:text-gray-400 text-gray-600">
-                  Date:
-                  <span class="font-medium text-gray-600 dark:text-gray-400 "
-                    >19 November 2025</span
-                  >
-                </p>
-                <p class="text-xs text-gray-600 mt-2 italic dark:text-gray-400">Jared Diamond</p>
-              </div>
-            </div>
-
-            <!-- Actions (Continue Reading, Delete) -->
-            <div class="flex items-center space-x-4 self-end md:self-center">
-              <button
-                class="px-4 py-2 text-sm font-medium border text-primary border-primary  rounded-lg transition duration-150 ease-in-out w-full md:w-auto whitespace-nowrap dark:text-white dark:border-white "
-              >
-                Continue Reading
-              </button>
-              <button
-                class="text-gray-400 hover:text-red-500 p-2 rounded-full transition duration-150 ease-in-out"
-              >
-                <svg
-                  class="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                  ></path>
-                </svg>
-              </button>
-            </div>
-          </div>
-        </section>
-
-        <!-- Group: Yesterday -->
-        <section class="space-y-5">
-          <h2 class="text-lg font-semibold text-gray-800 mb-4 border-b pb-2 dark:text-white">
-            Yesterday
-          </h2>
-
-          <!-- History Item 3 -->
-              <div
-            data-aos="zoom-in"
-            class="history-item bg-white p-4 sm:p-6 rounded-xl shadow-lg hover:shadow-xl transition duration-300 mb-4 flex flex-col md:flex-row items-start md:items-center justify-between space-y-4 md:space-y-0 md:space-x-6 border border-gray-100 dark:bg-primary"
-          >
-            <!-- Book Details (Image, Title, Info) -->
-            <div class="flex items-start flex-grow">
-              <img
-                class="book-cover mr-4"
-                src="https://placehold.co/80x120/1f2937/ffffff?text=Book+Cover"
-                onerror="this.onerror=null;this.src='https://placehold.co/80x120/1f2937/ffffff?text=Book+Cover';"
-                alt="Guns, Germs, And Steel"
-              />
-
-              <div>
-                <h3 class="text-lg font-semibold text-gray-900 leading-snug dark:text-white">
-                  Guns, Germs, And Steel
-                </h3>
-                <p class="text-sm text-primary dark:text-gray-400 mt-1">Adventure | Horror</p>
-                <p class="text-xs text-gray-600 mt-1 dark:text-gray-400">
-                  Viewed:
-                  <span class="font-medium text-gray-600 dark:text-gray-400">11:11 PM</span>
-                </p>
-                <p class="text-xs dark:text-gray-400 text-gray-600">
-                  Date:
-                  <span class="font-medium text-gray-600 dark:text-gray-400 "
-                    >19 November 2025</span
-                  >
-                </p>
-                <p class="text-xs text-gray-600 mt-2 italic dark:text-gray-400">Jared Diamond</p>
-              </div>
-            </div>
-
-            <!-- Actions (Continue Reading, Delete) -->
-            <div class="flex items-center space-x-4 self-end md:self-center">
-              <button
-                class="px-4 py-2 text-sm font-medium border text-primary border-primary  rounded-lg transition duration-150 ease-in-out w-full md:w-auto whitespace-nowrap dark:text-white dark:border-white "
-              >
-                Continue Reading
-              </button>
-              <button
-                class="text-gray-400 hover:text-red-500 p-2 rounded-full transition duration-150 ease-in-out"
-              >
-                <svg
-                  class="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                  ></path>
-                </svg>
-              </button>
-            </div>
-          </div>
-
-          <!--  -->
-              <div
-            data-aos="zoom-in"
-            class="history-item bg-white p-4 sm:p-6 rounded-xl shadow-lg hover:shadow-xl transition duration-300 mb-4 flex flex-col md:flex-row items-start md:items-center justify-between space-y-4 md:space-y-0 md:space-x-6 border border-gray-100 dark:bg-primary"
-          >
-            <!-- Book Details (Image, Title, Info) -->
-            <div class="flex items-start flex-grow">
-              <img
-                class="book-cover mr-4"
-                src="https://placehold.co/80x120/1f2937/ffffff?text=Book+Cover"
-                onerror="this.onerror=null;this.src='https://placehold.co/80x120/1f2937/ffffff?text=Book+Cover';"
-                alt="Guns, Germs, And Steel"
-              />
-
-              <div>
-                <h3 class="text-lg font-semibold text-gray-900 leading-snug dark:text-white">
-                  Guns, Germs, And Steel
-                </h3>
-                <p class="text-sm text-primary dark:text-gray-400 mt-1">Adventure | Horror</p>
-                <p class="text-xs text-gray-600 mt-1 dark:text-gray-400">
-                  Viewed:
-                  <span class="font-medium text-gray-600 dark:text-gray-400">11:11 PM</span>
-                </p>
-                <p class="text-xs dark:text-gray-400 text-gray-600">
-                  Date:
-                  <span class="font-medium text-gray-600 dark:text-gray-400 "
-                    >19 November 2025</span
-                  >
-                </p>
-                <p class="text-xs text-gray-600 mt-2 italic dark:text-gray-400">Jared Diamond</p>
-              </div>
-            </div>
-
-            <!-- Actions (Continue Reading, Delete) -->
-            <div class="flex items-center space-x-4 self-end md:self-center">
-              <button
-                class="px-4 py-2 text-sm font-medium border text-primary border-primary  rounded-lg transition duration-150 ease-in-out w-full md:w-auto whitespace-nowrap dark:text-white dark:border-white "
-              >
-                Continue Reading
-              </button>
-              <button
-                class="text-gray-400 hover:text-red-500 p-2 rounded-full transition duration-150 ease-in-out"
-              >
-                <svg
-                  class="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                  ></path>
-                </svg>
-              </button>
-            </div>
-          </div>
-          <!--  -->
-              <div
-            data-aos="zoom-in"
-            class="history-item bg-white p-4 sm:p-6 rounded-xl shadow-lg hover:shadow-xl transition duration-300 mb-4 flex flex-col md:flex-row items-start md:items-center justify-between space-y-4 md:space-y-0 md:space-x-6 border border-gray-100 dark:bg-primary"
-          >
-            <!-- Book Details (Image, Title, Info) -->
-            <div class="flex items-start flex-grow">
-              <img
-                class="book-cover mr-4"
-                src="https://placehold.co/80x120/1f2937/ffffff?text=Book+Cover"
-                onerror="this.onerror=null;this.src='https://placehold.co/80x120/1f2937/ffffff?text=Book+Cover';"
-                alt="Guns, Germs, And Steel"
-              />
-
-              <div>
-                <h3 class="text-lg font-semibold text-gray-900 leading-snug dark:text-white">
-                  Guns, Germs, And Steel
-                </h3>
-                <p class="text-sm text-primary dark:text-gray-400 mt-1">Adventure | Horror</p>
-                <p class="text-xs text-gray-600 mt-1 dark:text-gray-400">
-                  Viewed:
-                  <span class="font-medium text-gray-600 dark:text-gray-400">11:11 PM</span>
-                </p>
-                <p class="text-xs dark:text-gray-400 text-gray-600">
-                  Date:
-                  <span class="font-medium text-gray-600 dark:text-gray-400 "
-                    >19 November 2025</span
-                  >
-                </p>
-                <p class="text-xs text-gray-600 mt-2 italic dark:text-gray-400">Jared Diamond</p>
-              </div>
-            </div>
-
-            <!-- Actions (Continue Reading, Delete) -->
-            <div class="flex items-center space-x-4 self-end md:self-center">
-              <button
-                class="px-4 py-2 text-sm font-medium border text-primary border-primary  rounded-lg transition duration-150 ease-in-out w-full md:w-auto whitespace-nowrap dark:text-white dark:border-white "
-              >
-                Continue Reading
-              </button>
-              <button
-                class="text-gray-400 hover:text-red-500 p-2 rounded-full transition duration-150 ease-in-out"
-              >
-                <svg
-                  class="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                  ></path>
-                </svg>
-              </button>
-            </div>
-          </div>
-        </section>
-      </div>
+      <div class="space-y-5 min-h-[300px]"></div>
     </main>
 
-    <script src="../js/navbar.js"></script>
+    <div id="footer-container"></div>
 
+    <script src="../js/navbar.js"></script>
+    <script src="../js/footer.js"></script>
+
+    <script src="../js/history.js"></script>
 
     <script>
-      // Initialize Navbar
-      renderNavbar("navbar-container", "home");
-
-      // Initialize Footer
+      renderNavbar("navbar-container", "mybook");
       renderFooter("footer-container");
     </script>
-    <!-- AOS -->
-            <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
-            <script>
-              AOS.init({
-                duration: 1000, // ១វិនាទីក្នុងការផ្លាស់ប្តូរ
-                once: true, // បង្ហាញតែម្តងពេលscrollមកដល់
-              });
-            </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+    <script>
+      AOS.init({
+        duration: 800,
+        once: true,
+      });
+    </script>
   </body>
 </html>
