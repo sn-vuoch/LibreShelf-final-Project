@@ -4,8 +4,6 @@ import { Utils, Books } from "./api.js";
 const els = {
   form: document.getElementById("upload-form"),
   catSelect: document.getElementById("category-select"),
-  catInput: document.getElementById("category-input"),
-  toggleCatBtn: document.getElementById("toggle-cat-mode"),
 
   coverInput: document.getElementById("cover-file"),
   coverPreview: document.getElementById("cover-preview"),
@@ -27,7 +25,6 @@ const els = {
 // State
 let isEditMode = false;
 let editBookId = null;
-let isNewCategoryMode = false;
 
 // --- INIT ---
 document.addEventListener("DOMContentLoaded", async () => {
@@ -39,15 +36,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
-  // 1. Load Categories
+  // 1. Load Categories FIRST and wait for it to finish
   await loadCategories();
 
-  // 2. Check for Edit Mode
+  // 2. Check for Edit Mode AFTER categories are loaded
   const params = new URLSearchParams(window.location.search);
   if (params.has("edit")) {
     isEditMode = true;
     editBookId = params.get("edit");
-    setupEditMode(editBookId);
+    await setupEditMode(editBookId);
   }
 });
 
@@ -55,19 +52,24 @@ document.addEventListener("DOMContentLoaded", async () => {
 async function loadCategories() {
   try {
     const categories = await Utils.getCategories();
+
+    // Clear and add default option
     els.catSelect.innerHTML =
       '<option value="" disabled selected>Select a genre</option>';
+
     if (categories && categories.length > 0) {
       els.catSelect.innerHTML += categories
         .map((cat) => `<option value="${cat.id}">${cat.name}</option>`)
         .join("");
     }
   } catch (err) {
-    console.error(err);
+    console.error("Failed to load categories", err);
+    els.catSelect.innerHTML =
+      '<option value="" disabled>Error loading categories</option>';
   }
 }
 
-// --- SETUP EDIT MODE ---
+// --- SETUP EDIT MODE (SUPER ROBUST FIX) ---
 async function setupEditMode(id) {
   els.pageTitle.textContent = "Edit Book";
   els.submitBtn.innerHTML = `<i class="ph-bold ph-pencil"></i> Update Book`;
@@ -76,17 +78,56 @@ async function setupEditMode(id) {
   try {
     const book = await Books.getById(id);
 
-    // Fill Form
-    document.getElementById("title").value = book.title;
-    document.getElementById("description").value = book.description;
+    // 1. Fill Text Fields
+    document.getElementById("title").value = book.title || "";
+    document.getElementById("description").value = book.description || "";
 
-    // Handle Category
-    // Assumption: book.categories is array of objects. We take first one.
+    // 2. Handle Category Selection
+    // We look for the ID in multiple potential properties to be safe
+    let targetId = null;
+
+    // Check 'categories' array (Standard)
     if (book.categories && book.categories.length > 0) {
-      els.catSelect.value = book.categories[0].id;
+      const first = book.categories[0];
+      if (typeof first === "object" && first !== null && first.id)
+        targetId = first.id;
+      else if (typeof first === "number") targetId = first;
+      else if (typeof first === "string") {
+        // Try to match string name to option text
+        const match = Array.from(els.catSelect.options).find(
+          (o) => o.text.toLowerCase() === first.toLowerCase()
+        );
+        if (match) targetId = match.value;
+      }
     }
 
-    // Fill Images/Files (Visual only)
+    // Check 'category_ids' array (Common in Edit Payloads)
+    if (!targetId && book.category_ids && book.category_ids.length > 0) {
+      targetId = book.category_ids[0];
+    }
+
+    // Check 'category' object or 'category_id' (Singular)
+    if (!targetId) {
+      if (book.category_id) targetId = book.category_id;
+      else if (book.category && book.category.id) targetId = book.category.id;
+    }
+
+    // Apply if found
+    if (targetId) {
+      // Force to string to match HTML value
+      els.catSelect.value = targetId.toString();
+
+      // Debugging: If it didn't select, verify why
+      if (els.catSelect.value === "") {
+        console.warn(
+          `Found Book Category ID ${targetId}, but it does not match any options in the dropdown.`
+        );
+      }
+    } else {
+      console.warn("No category ID found in book object:", book);
+    }
+
+    // 3. Fill Images/Files (Visual only)
     if (book.thumbnail) {
       els.coverPreview.src = book.thumbnail;
       els.coverPreview.classList.remove("hidden");
@@ -98,29 +139,12 @@ async function setupEditMode(id) {
       els.existingPdf.value = book.file_url;
     }
   } catch (error) {
-    alert("Failed to load book data.");
+    console.error(error);
+    alert("Failed to load book details. Please try again.");
   } finally {
     els.loader.classList.add("hidden");
   }
 }
-
-// --- CATEGORY TOGGLE LOGIC ---
-els.toggleCatBtn.addEventListener("click", () => {
-  isNewCategoryMode = !isNewCategoryMode;
-  if (isNewCategoryMode) {
-    els.catSelect.classList.add("hidden");
-    els.catSelect.disabled = true;
-    els.catInput.classList.remove("hidden");
-    els.catInput.disabled = false;
-    els.toggleCatBtn.textContent = "Cancel (Select Existing)";
-  } else {
-    els.catSelect.classList.remove("hidden");
-    els.catSelect.disabled = false;
-    els.catInput.classList.add("hidden");
-    els.catInput.disabled = true;
-    els.toggleCatBtn.textContent = "+ Create New";
-  }
-});
 
 // --- SUBMIT LOGIC ---
 els.form.addEventListener("submit", async (e) => {
@@ -130,34 +154,8 @@ els.form.addEventListener("submit", async (e) => {
 
   try {
     // 1. Handle Category
-    let finalCategoryId = els.catSelect.value;
-
-    if (isNewCategoryMode) {
-      const newCatName = els.catInput.value;
-      if (!newCatName) throw new Error("Please enter a category name.");
-
-      // Create Category via API (assuming POST /categories works)
-      // Note: Check api.js if you have a method for this. If not, use raw fetch.
-      // Using raw fetch here for safety based on your provided file list
-      const token = localStorage.getItem("access_token");
-      const catRes = await fetch(
-        "https://stem-api.anajak-khmer.site/categories/",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            name: newCatName,
-            description: "User created",
-          }),
-        }
-      );
-      if (!catRes.ok) throw new Error("Failed to create category");
-      const newCat = await catRes.json();
-      finalCategoryId = newCat.id;
-    }
+    const finalCategoryId = els.catSelect.value;
+    if (!finalCategoryId) throw new Error("Please select a category.");
 
     // 2. Handle Files
     let coverUrl = els.existingCover.value;
@@ -179,7 +177,7 @@ els.form.addEventListener("submit", async (e) => {
       pdfUrl = typeof res === "string" ? res : res.url || res.file_url;
     }
 
-    // Validation for Create Mode
+    // Validation
     if (!isEditMode && (!coverUrl || !pdfUrl)) {
       throw new Error("Cover image and PDF are required.");
     }
@@ -188,7 +186,7 @@ els.form.addEventListener("submit", async (e) => {
     const payload = {
       title: document.getElementById("title").value,
       description: document.getElementById("description").value,
-      category_ids: [parseInt(finalCategoryId)],
+      category_ids: [parseInt(finalCategoryId)], // Ensure integer array
       thumbnail: coverUrl,
       file_url: pdfUrl,
       metadata: "{}",
@@ -196,7 +194,7 @@ els.form.addEventListener("submit", async (e) => {
 
     // 4. Send Request (Create or Update)
     if (isEditMode) {
-      await Books.update(editBookId, payload); // Ensure api.js has update()
+      await Books.update(editBookId, payload);
       alert("Book Updated Successfully!");
     } else {
       await Books.create(payload);

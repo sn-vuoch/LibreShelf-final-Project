@@ -123,7 +123,7 @@ function renderPopularBooks(books) {
                         <!-- Add Bookmark -->
                         <button onclick="toggleHomeFavorite(${
                           book.id
-                        })" class="text-dark-gray dark:text-gray-400 hover:text-red-500 transition-colors" title="Add to Favorites">
+                        }, this))" class="text-dark-gray dark:text-gray-400 hover:text-red-500 transition-colors" title="Add to Favorites">
                             <i class="ph-bold ph-heart text-xl"></i>
                         </button>
                         <!-- Download (Direct Link) -->
@@ -147,8 +147,96 @@ function renderPopularBooks(books) {
     .join("");
 }
 
-// Helper for Home Favorites (Simple Alert for now, connected to API later)
-window.toggleHomeFavorite = async (id) => {
-  alert("Please go to the detail page to manage favorites properly.");
-  // Or you can import Books.addBookmark and implement full logic here
+// --- FAVORITE LOGIC ---
+
+// 1. Helper to sync UI on load
+async function highlightUserFavorites() {
+  const token = localStorage.getItem("access_token");
+  if (!token) return;
+
+  try {
+    const bookmarks = await Books.getBookmarks();
+    // Get all heart icons on the page
+    // Note: This requires your heart buttons to have a specific ID or class logic.
+    // A better way is to check the ID passed to the onclick handler.
+
+    // We will store IDs in a Set for fast lookup
+    const favIds = new Set(bookmarks.map((b) => b.book_id));
+
+    // Find all buttons that call toggleHomeFavorite
+    const buttons = document.querySelectorAll(
+      'button[onclick^="toggleHomeFavorite"]'
+    );
+
+    buttons.forEach((btn) => {
+      // Extract ID from the onclick attribute string: toggleHomeFavorite(12)
+      const onClickText = btn.getAttribute("onclick");
+      const idMatch = onClickText.match(/\d+/); // Find the number
+      if (idMatch && favIds.has(parseInt(idMatch[0]))) {
+        const icon = btn.querySelector("i");
+        icon.classList.remove(
+          "ph-bold",
+          "text-dark-gray",
+          "dark:text-gray-400"
+        );
+        icon.classList.add("ph-fill", "text-red-500");
+      }
+    });
+  } catch (err) {
+    console.error("Error syncing home favorites", err);
+  }
+}
+
+// 2. The Toggle Function (Global)
+window.toggleHomeFavorite = async (id, btnElement) => {
+  // Note: To change the icon instantly, we need the button element.
+  // Update your HTML generation in renderNewReleases/renderPopularBooks
+  // to pass 'this': onclick="toggleHomeFavorite(${book.id}, this)"
+
+  // Fallback if 'this' wasn't passed (try to find event target)
+  const btn = btnElement || event.currentTarget;
+  const icon = btn.querySelector("i");
+
+  const token = localStorage.getItem("access_token");
+  if (!token) {
+    alert("Please login to save favorites.");
+    return;
+  }
+
+  // Toggle UI State
+  const isFav = icon.classList.contains("ph-fill");
+
+  if (isFav) {
+    // Remove
+    icon.classList.remove("ph-fill", "text-red-500");
+    icon.classList.add("ph-bold", "text-dark-gray");
+    try {
+      await Books.removeBookmark(id);
+    } catch (e) {
+      console.error(e);
+      // Revert on error
+      icon.classList.add("ph-fill", "text-red-500");
+      icon.classList.remove("ph-bold", "text-dark-gray");
+    }
+  } else {
+    // Add
+    icon.classList.remove("ph-bold", "text-dark-gray");
+    icon.classList.add("ph-fill", "text-red-500");
+    try {
+      await Books.addBookmark(id);
+    } catch (e) {
+      console.error(e);
+      // Revert on error
+      icon.classList.add("ph-bold", "text-dark-gray");
+      icon.classList.remove("ph-fill", "text-red-500");
+    }
+  }
 };
+
+// 3. Call highlighting after rendering is done
+document.addEventListener("DOMContentLoaded", async () => {
+  // ... (Your existing render calls) ...
+
+  // Add this at the end of the try block:
+  await highlightUserFavorites();
+});

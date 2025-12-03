@@ -6,17 +6,13 @@
     <title>Upload Book - LibreShelf</title>
 
     <link href="../src/output.css" rel="stylesheet" />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap"
-      rel="stylesheet"
-    />
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
     <script type="module" src="../js/api.js"></script>
     <script src="../js/theme.js"></script>
   </head>
   <body
-    class="bg-gray-50 dark:bg-slate-900 font-sans text-text-black dark:text-gray-100 transition-colors duration-300"
+    class="bg-gray-50 dark:bg-slate-900 font-primary text-text-black dark:text-gray-100 transition-colors duration-300"
   >
     <div id="navbar-container"></div>
 
@@ -79,21 +75,11 @@
 
               <!-- CATEGORY SECTION -->
               <div class="space-y-2">
-                <div class="flex justify-between items-center">
-                  <label
-                    class="font-bold text-sm text-gray-700 dark:text-gray-300"
-                    >Category <span class="text-red-500">*</span></label
-                  >
-                  <button
-                    type="button"
-                    id="toggle-cat-mode"
-                    class="text-xs font-bold text-accent hover:text-yellow-500 transition"
-                  >
-                    + Create New
-                  </button>
-                </div>
+                <label
+                  class="font-bold text-sm text-gray-700 dark:text-gray-300"
+                  >Category <span class="text-red-500">*</span></label
+                >
 
-                <!-- Mode 1: Select -->
                 <select
                   id="category-select"
                   required
@@ -101,15 +87,6 @@
                 >
                   <option value="" disabled selected>Select a genre</option>
                 </select>
-
-                <!-- Mode 2: Input (Hidden initially) -->
-                <input
-                  type="text"
-                  id="category-input"
-                  placeholder="Enter new category name"
-                  disabled
-                  class="hidden w-full p-3 rounded-lg border border-gray-300 dark:border-slate-600 bg-background dark:bg-slate-900 focus:ring-2 focus:ring-accent outline-none transition"
-                />
               </div>
             </div>
 

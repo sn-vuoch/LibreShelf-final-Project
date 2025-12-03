@@ -104,25 +104,41 @@ function renderBookDetails(book) {
 
   // Hide Loading Overlay
   els.loading.classList.add("hidden");
+
+  addToHistory(book);
 }
 
 // --- FAVORITE LOGIC ---
 const favBtn = document.getElementById("favorite-btn");
 const bookId = new URLSearchParams(window.location.search).get("id");
+let isFavorite = false;
 
-// 1. Check if already favorite
-function checkFavoriteStatus() {
-  // Get array from local storage: ['1', '5', '12']
-  const favorites = JSON.parse(localStorage.getItem("user_favorites") || "[]");
-  const isFav = favorites.includes(bookId);
-  updateFavoriteUI(isFav);
+// 1. Check status from API on load
+async function checkFavoriteStatus() {
+  try {
+    // Check if user is logged in first
+    const token = localStorage.getItem("access_token");
+    if (!token) return; // Leave as default (gray) if not logged in
+
+    // Fetch user's bookmarks from Server
+    const bookmarks = await Books.getBookmarks();
+
+    // Check if current book is in the list
+    // Note: bookmarks might be array of objects, so we check book.id
+    // We compare with loose equality (==) because URL params are strings
+    isFavorite = bookmarks.some((bookmark) => bookmark.book_id == bookId);
+
+    updateFavoriteUI(isFavorite);
+  } catch (error) {
+    console.error("Failed to fetch bookmarks:", error);
+  }
 }
 
 // 2. Update Button Style
-function updateFavoriteUI(isFav) {
-  if (isFav) {
+function updateFavoriteUI(active) {
+  if (active) {
     favBtn.classList.add("bg-red-500", "border-red-500", "text-white");
-    favBtn.classList.remove("border-white/30", "text-white"); // Remove transparent styles if needed
+    favBtn.classList.remove("border-white/30");
     favBtn.innerHTML = `<i class="ph-fill ph-heart text-xl"></i> <span>Saved</span>`;
   } else {
     favBtn.classList.remove("bg-red-500", "border-red-500");
@@ -132,23 +148,34 @@ function updateFavoriteUI(isFav) {
 }
 
 // 3. Toggle Handler
-favBtn.addEventListener("click", () => {
-  let favorites = JSON.parse(localStorage.getItem("user_favorites") || "[]");
-
-  if (favorites.includes(bookId)) {
-    // Remove
-    favorites = favorites.filter((id) => id !== bookId);
-    updateFavoriteUI(false);
-  } else {
-    // Add
-    favorites.push(bookId);
-    updateFavoriteUI(true);
+favBtn.addEventListener("click", async () => {
+  // 1. Auth Check
+  const token = localStorage.getItem("access_token");
+  if (!token) {
+    alert("Please sign in to save favorites.");
+    window.location.href = "../pages/signin.html";
+    return;
   }
 
-  localStorage.setItem("user_favorites", JSON.stringify(favorites));
+  // 2. Optimistic UI Update (Change color immediately)
+  isFavorite = !isFavorite;
+  updateFavoriteUI(isFavorite);
+
+  try {
+    if (isFavorite) {
+      await Books.addBookmark(bookId);
+    } else {
+      await Books.removeBookmark(bookId);
+    }
+  } catch (error) {
+    // Revert if API fails
+    isFavorite = !isFavorite;
+    updateFavoriteUI(isFavorite);
+    alert("Failed to update favorite. " + error.message);
+  }
 });
 
-// Call this on load
+// Call on load
 checkFavoriteStatus();
 
 // --- FULLSCREEN LOGIC ---
@@ -178,4 +205,40 @@ if (fullscreenBtn && pdfContainer) {
         '<i class="ph-bold ph-corners-out text-xl"></i>';
     }
   });
+}
+
+// --- HISTORY LOGIC ---
+function addToHistory(book) {
+  // 1. Get existing history or empty array
+  let history = JSON.parse(localStorage.getItem("read_history") || "[]");
+
+  // 2. Remove if duplicate (so we can move it to the top)
+  history = history.filter((item) => item.id != book.id);
+
+  // 3. Create simple history object
+  const historyItem = {
+    id: book.id,
+    title: book.title,
+    author: book.author || "Unknown",
+    thumbnail: book.thumbnail || "https://placehold.co/100",
+    category:
+      Array.isArray(book.categories) && book.categories[0]
+        ? book.categories[0].name
+        : "General",
+    date: new Date().toLocaleDateString("en-US", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    }),
+    timestamp: Date.now(), // Useful if you want to sort by time later
+  };
+
+  // 4. Add to the beginning of the array
+  history.unshift(historyItem);
+
+  // 5. Limit to last 20 items to keep storage clean
+  if (history.length > 20) history.pop();
+
+  // 6. Save back to storage
+  localStorage.setItem("read_history", JSON.stringify(history));
 }
