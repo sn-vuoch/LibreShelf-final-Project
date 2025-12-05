@@ -81,14 +81,16 @@ function renderBookDetails(book) {
 
   // PDF / Download Logic
   if (book.file_url) {
-    // Set Download Link
-    els.downloadBtn.href = book.file_url;
-    els.fallbackDownload.href = book.file_url;
+    const secureUrl = book.file_url.replace(/^http:\/\//i, 'https://');
 
-    els.pdfViewer.src = book.file_url;
+    // Set Download Link
+    els.downloadBtn.href = secureUrl;
+    els.fallbackDownload.href = secureUrl;
+
+    els.pdfViewer.src = secureUrl;
 
     // Simple check: If file_url is not a PDF, hide viewer
-    if (!book.file_url.toLowerCase().endsWith(".pdf")) {
+    if (!secureUrl.toLowerCase().endsWith(".pdf")) {
       els.pdfViewer.classList.add("hidden");
       els.pdfFallback.classList.remove("hidden");
     }
