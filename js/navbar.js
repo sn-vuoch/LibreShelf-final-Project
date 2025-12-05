@@ -147,25 +147,29 @@ function renderNavbar(containerId, activePage = "") {
         <!-- 5. MOBILE MENU DROPDOWN -->
         <div id="mobile-menu" class="mobile-menu md:hidden bg-pure-white dark:bg-slate-900 shadow-lg overflow-hidden max-h-0 opacity-0 transition-all duration-300 ease-in-out">
             <div class="px-4 py-4 space-y-3 flex flex-col">
+                
                 <a href="${pathPrefix}/index.html" class="block px-4 py-2 rounded-lg ${
     activePage === "home"
-      ? "bg-gray-50 dark:bg-slate-800 text-primary font-bold"
-      : "text-primary dark:text-accent hover:bg-gray-50 dark:hover:bg-slate-800"
+      ? "bg-gray-50 dark:bg-slate-800 text-primary dark:text-accent font-bold"
+      : "text-primary dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800"
   }">Home</a>
+
                 <a href="${pathPrefix}/pages/categories.html" class="block px-4 py-2 rounded-lg ${
     activePage === "categories"
-      ? "bg-gray-50 dark:bg-slate-800 text-primary  dark:text-accent font-bold"
-      : "text-primary dark:text-gray-300 hover:bg-gray-50 dark:bg-slate-800"
+      ? "bg-gray-50 dark:bg-slate-800 text-primary dark:text-accent font-bold"
+      : "text-primary dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800"
   }">Categories</a>
+
                 <a href="${pathPrefix}/pages/about-us.html" class="block px-4 py-2 rounded-lg ${
     activePage === "about"
       ? "bg-gray-50 dark:bg-slate-800 text-primary dark:text-accent font-bold"
-      : "text-primary dark:text-gray-300 hover:bg-gray-50 "
+      : "text-primary dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800"
   }">About Us</a>
+
                 <a href="${pathPrefix}/pages/book.html" class="block px-4 py-2 rounded-lg ${
     activePage === "mybook"
       ? "bg-gray-50 dark:bg-slate-800 text-primary dark:text-accent font-bold"
-      : "text-primary dark:text-gray-300 hover:bg-gray-50"
+      : "text-primary dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-800"
   }">My Book</a>
                 <hr class="border-gray-200">
 
