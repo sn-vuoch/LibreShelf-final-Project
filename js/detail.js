@@ -94,7 +94,6 @@ function renderBookDetails(book) {
       els.pdfFallback.classList.remove("hidden");
     }
   } else {
-    // (Your existing else block)
     els.downloadBtn.classList.add("opacity-50", "cursor-not-allowed");
     els.downloadBtn.innerText = "Unavailable";
     els.pdfViewer.classList.add("hidden");
@@ -181,25 +180,30 @@ const pdfContainer = document.getElementById("pdf-container");
 
 if (fullscreenBtn && pdfContainer) {
   fullscreenBtn.addEventListener("click", () => {
+    // 1. iPhone/iOS Check: If requestFullscreen doesn't exist on the div...
+    if (!pdfContainer.requestFullscreen) {
+        // ...Fallback: Open PDF in a new tab
+        window.open(els.downloadBtn.href, '_blank');
+        return;
+    }
+
+    // 2. Android/Desktop Logic
     if (!document.fullscreenElement) {
-      // Enter Fullscreen
       pdfContainer.requestFullscreen().catch((err) => {
-        alert(`Error attempting to enable fullscreen: ${err.message}`);
+        console.warn("Fullscreen blocked, opening in new tab", err);
+        window.open(els.downloadBtn.href, '_blank');
       });
-      fullscreenBtn.innerHTML = '<i class="ph-bold ph-corners-in text-xl"></i>'; // Change icon to "Exit"
+      fullscreenBtn.innerHTML = '<i class="ph-bold ph-corners-in text-xl"></i>';
     } else {
-      // Exit Fullscreen
       document.exitFullscreen();
-      fullscreenBtn.innerHTML =
-        '<i class="ph-bold ph-corners-out text-xl"></i>'; // Change icon to "Enter"
+      fullscreenBtn.innerHTML = '<i class="ph-bold ph-corners-out text-xl"></i>';
     }
   });
 
-  // Listen for Escape key or manual exit to reset icon
+  // Reset icon on Escape key
   document.addEventListener("fullscreenchange", () => {
     if (!document.fullscreenElement) {
-      fullscreenBtn.innerHTML =
-        '<i class="ph-bold ph-corners-out text-xl"></i>';
+      fullscreenBtn.innerHTML = '<i class="ph-bold ph-corners-out text-xl"></i>';
     }
   });
 }
@@ -239,21 +243,3 @@ function addToHistory(book) {
   // 6. Save back to storage
   localStorage.setItem("read_history", JSON.stringify(history));
 }
-
-// Fix ISO didn't support iframe
-fullscreenBtn.addEventListener("click", () => {
-    if (!pdfContainer.requestFullscreen) {
-        window.open(els.downloadBtn.href, '_blank');
-        return;
-    }
-    
-    if (!document.fullscreenElement) {
-        pdfContainer.requestFullscreen().catch(err => {
-            window.open(els.downloadBtn.href, '_blank');
-        });
-        fullscreenBtn.innerHTML = '<i class="ph-bold ph-corners-in text-xl"></i>';
-    } else {
-        document.exitFullscreen();
-        fullscreenBtn.innerHTML = '<i class="ph-bold ph-corners-out text-xl"></i>';
-    }
-});
