@@ -83,18 +83,18 @@ function renderBookDetails(book) {
   if (book.file_url) {
     const secureUrl = book.file_url.replace(/^http:\/\//i, 'https://');
 
-    // Set Download Link
     els.downloadBtn.href = secureUrl;
     els.fallbackDownload.href = secureUrl;
 
-    els.pdfViewer.src = secureUrl;
+    const googleViewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(secureUrl)}&embedded=true`;
+    els.pdfViewer.src = googleViewerUrl;
 
-    // Simple check: If file_url is not a PDF, hide viewer
     if (!secureUrl.toLowerCase().endsWith(".pdf")) {
       els.pdfViewer.classList.add("hidden");
       els.pdfFallback.classList.remove("hidden");
     }
   } else {
+    // (Your existing else block)
     els.downloadBtn.classList.add("opacity-50", "cursor-not-allowed");
     els.downloadBtn.innerText = "Unavailable";
     els.pdfViewer.classList.add("hidden");
@@ -239,3 +239,21 @@ function addToHistory(book) {
   // 6. Save back to storage
   localStorage.setItem("read_history", JSON.stringify(history));
 }
+
+// Fix ISO didn't support iframe
+fullscreenBtn.addEventListener("click", () => {
+    if (!pdfContainer.requestFullscreen) {
+        window.open(els.downloadBtn.href, '_blank');
+        return;
+    }
+    
+    if (!document.fullscreenElement) {
+        pdfContainer.requestFullscreen().catch(err => {
+            window.open(els.downloadBtn.href, '_blank');
+        });
+        fullscreenBtn.innerHTML = '<i class="ph-bold ph-corners-in text-xl"></i>';
+    } else {
+        document.exitFullscreen();
+        fullscreenBtn.innerHTML = '<i class="ph-bold ph-corners-out text-xl"></i>';
+    }
+});
