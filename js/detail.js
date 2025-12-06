@@ -12,11 +12,11 @@ const els = {
   pdfFallback: document.getElementById("pdf-fallback"),
   loading: document.getElementById("loading-state"),
   fallbackDownload: document.getElementById("fallback-download"),
+  pdfContainer: document.getElementById("pdf-container"),
 };
 
 // --- INITIALIZE ---
 document.addEventListener("DOMContentLoaded", async () => {
-  // 1. Get ID from URL Query Params
   const params = new URLSearchParams(window.location.search);
   const bookId = params.get("id");
 
@@ -27,24 +27,18 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   try {
-    // 2. Fetch Book Data
     const book = await Books.getById(bookId);
-
-    // 3. Render Data
     renderBookDetails(book);
   } catch (error) {
     console.error("Detail Error:", error);
     els.title.innerText = "Book not found";
-    els.desc.innerText =
-      "The book you are looking for does not exist or has been removed.";
+    els.desc.innerText = "The book you are looking for does not exist or has been removed.";
     els.loading.classList.add("hidden");
   }
 });
 
 // --- RENDER FUNCTION ---
 function renderBookDetails(book) {
-  // 1. Mock Page Count (Random number between 100-500 for demo)
-  // If API had a 'pages' field, we would use: book.pages || 'N/A'
   const mockPages = Math.floor(Math.random() * (500 - 100 + 1) + 100);
   const pageCountEl = document.getElementById("page-count");
   if (pageCountEl) pageCountEl.innerText = `${mockPages} Pages`;
@@ -52,46 +46,54 @@ function renderBookDetails(book) {
   // Basic Info
   els.title.innerText = book.title || "Untitled";
   els.author.innerText = book.author || "Unknown Author";
-  els.desc.innerText =
-    book.description || "No description available for this title.";
+  els.desc.innerText = book.description || "No description available for this title.";
 
   // Images
-  const coverUrl =
-    book.thumbnail || "https://placehold.co/300x450/112d4e/FFF?text=No+Cover";
+  const coverUrl = book.thumbnail || "https://placehold.co/300x450/112d4e/FFF?text=No+Cover";
   els.cover.src = coverUrl;
 
-  // Categories/Genres (Check if array or string)
+  // Categories
   els.genres.innerHTML = "";
   const cats = Array.isArray(book.categories) ? book.categories : [];
 
   if (cats.length > 0) {
     cats.forEach((cat) => {
-      // Check if cat is object {id, name} or string
       const name = typeof cat === "object" ? cat.name : cat;
       const badge = document.createElement("span");
-      badge.className =
-        "px-3 py-1 bg-white/20 rounded-full text-xs font-bold text-white backdrop-blur-sm uppercase tracking-wide";
+      badge.className = "px-3 py-1 bg-white/20 rounded-full text-xs font-bold text-white backdrop-blur-sm uppercase tracking-wide";
       badge.innerText = name;
       els.genres.appendChild(badge);
     });
   } else {
-    els.genres.innerHTML =
-      '<span class="text-sm text-gray-400 italic">General</span>';
+    els.genres.innerHTML = '<span class="text-sm text-gray-400 italic">General</span>';
   }
 
-  // PDF / Download Logic
+  // --- PDF LOGIC (Updated) ---
   if (book.file_url) {
+    // 1. Force HTTPS
     const secureUrl = book.file_url.replace(/^http:\/\//i, 'https://');
 
     els.downloadBtn.href = secureUrl;
     els.fallbackDownload.href = secureUrl;
 
+    // 2. Setup Google Viewer URL
     const googleViewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(secureUrl)}&embedded=true`;
+    
+    // 3. Setup PDF Loading State
+    setupPdfLoader();
     els.pdfViewer.src = googleViewerUrl;
 
-    if (!secureUrl.toLowerCase().endsWith(".pdf")) {
+    // 4. Handle "No Preview" / Reload Logic
+    injectReloadButton(googleViewerUrl);
+
+    // 5. robust .pdf check (ignores query params like ?t=123)
+    const cleanUrl = secureUrl.split('?')[0].toLowerCase();
+    if (!cleanUrl.endsWith(".pdf")) {
       els.pdfViewer.classList.add("hidden");
       els.pdfFallback.classList.remove("hidden");
+      // Hide loader if falling back
+      const loader = document.getElementById("pdf-frame-loader");
+      if(loader) loader.classList.add("hidden");
     }
   } else {
     els.downloadBtn.classList.add("opacity-50", "cursor-not-allowed");
@@ -100,10 +102,65 @@ function renderBookDetails(book) {
     els.pdfFallback.classList.remove("hidden");
   }
 
-  // Hide Loading Overlay
   els.loading.classList.add("hidden");
-
   addToHistory(book);
+}
+
+// --- HELPER: PDF LOADER ---
+function setupPdfLoader() {
+  if (!els.pdfContainer) return;
+
+  // Create loader if it doesn't exist
+  let loader = document.getElementById("pdf-frame-loader");
+  if (!loader) {
+    loader = document.createElement("div");
+    loader.id = "pdf-frame-loader";
+    loader.className = "absolute inset-0 flex flex-col items-center justify-center bg-gray-50 z-10 rounded-2xl";
+    loader.innerHTML = `
+      <i class="ph-bold ph-spinner animate-spin text-3xl text-secondary"></i>
+      <p class="mt-2 text-sm text-gray-500 font-medium">Loading Book Preview...</p>
+    `;
+    // Ensure container is relative so loader sits on top
+    els.pdfContainer.classList.add("relative");
+    els.pdfContainer.insertBefore(loader, els.pdfViewer);
+  }
+
+  // Show loader initially
+  loader.classList.remove("hidden");
+
+  // Hide loader when iframe loads
+  els.pdfViewer.onload = () => {
+    loader.classList.add("hidden");
+  };
+}
+
+// --- HELPER: RELOAD BUTTON ---
+function injectReloadButton(url) {
+  const fullscreenBtn = document.getElementById("fullscreen-btn");
+  if (!fullscreenBtn || document.getElementById("reload-pdf-btn")) return;
+
+  // Create Reload Button
+  const reloadBtn = document.createElement("button");
+  reloadBtn.id = "reload-pdf-btn";
+  reloadBtn.className = "p-2 hover:bg-gray-200 dark:hover:bg-slate-700 rounded-lg transition-colors text-gray-600 dark:text-gray-300 mr-1";
+  reloadBtn.title = "Reload Preview";
+  reloadBtn.innerHTML = '<i class="ph-bold ph-arrows-clockwise text-xl"></i>';
+  
+  // Reload Logic
+  reloadBtn.onclick = () => {
+    // Show loader again
+    const loader = document.getElementById("pdf-frame-loader");
+    if(loader) loader.classList.remove("hidden");
+    
+    // Reset src to trigger reload
+    els.pdfViewer.src = 'about:blank';
+    setTimeout(() => {
+        els.pdfViewer.src = url;
+    }, 100);
+  };
+
+  // Insert before the fullscreen button
+  fullscreenBtn.parentNode.insertBefore(reloadBtn, fullscreenBtn);
 }
 
 // --- FAVORITE LOGIC ---
@@ -111,26 +168,19 @@ const favBtn = document.getElementById("favorite-btn");
 const bookId = new URLSearchParams(window.location.search).get("id");
 let isFavorite = false;
 
-// 1. Check status from API on load
 async function checkFavoriteStatus() {
   try {
-    // Check if user is logged in first
     const token = localStorage.getItem("access_token");
-    if (!token) return; // Leave as default (gray) if not logged in
+    if (!token) return;
 
-    // Fetch user's bookmarks from Server
     const bookmarks = await Books.getBookmarks();
-
-    // Check if current book is in the list
     isFavorite = bookmarks.some((bookmark) => bookmark.book_id == bookId);
-
     updateFavoriteUI(isFavorite);
   } catch (error) {
     console.error("Failed to fetch bookmarks:", error);
   }
 }
 
-// 2. Update Button Style
 function updateFavoriteUI(active) {
   if (active) {
     favBtn.classList.add("bg-red-500", "border-red-500", "text-white");
@@ -143,9 +193,7 @@ function updateFavoriteUI(active) {
   }
 }
 
-// 3. Toggle Handler
 favBtn.addEventListener("click", async () => {
-  // 1. Auth Check
   const token = localStorage.getItem("access_token");
   if (!token) {
     alert("Please sign in to save favorites.");
@@ -153,7 +201,6 @@ favBtn.addEventListener("click", async () => {
     return;
   }
 
-  // 2. Optimistic UI Update (Change color immediately)
   isFavorite = !isFavorite;
   updateFavoriteUI(isFavorite);
 
@@ -164,14 +211,12 @@ favBtn.addEventListener("click", async () => {
       await Books.removeBookmark(bookId);
     }
   } catch (error) {
-    // Revert if API fails
     isFavorite = !isFavorite;
     updateFavoriteUI(isFavorite);
     alert("Failed to update favorite. " + error.message);
   }
 });
 
-// Call on load
 checkFavoriteStatus();
 
 // --- FULLSCREEN LOGIC ---
@@ -180,9 +225,8 @@ const pdfContainer = document.getElementById("pdf-container");
 
 if (fullscreenBtn && pdfContainer) {
   fullscreenBtn.addEventListener("click", () => {
-    // 1. iPhone/iOS Check: If requestFullscreen doesn't exist on the div...
+    // 1. iPhone/iOS Check
     if (!pdfContainer.requestFullscreen) {
-        // ...Fallback: Open PDF in a new tab
         window.open(els.downloadBtn.href, '_blank');
         return;
     }
@@ -200,7 +244,6 @@ if (fullscreenBtn && pdfContainer) {
     }
   });
 
-  // Reset icon on Escape key
   document.addEventListener("fullscreenchange", () => {
     if (!document.fullscreenElement) {
       fullscreenBtn.innerHTML = '<i class="ph-bold ph-corners-out text-xl"></i>';
@@ -210,36 +253,20 @@ if (fullscreenBtn && pdfContainer) {
 
 // --- HISTORY LOGIC ---
 function addToHistory(book) {
-  // 1. Get existing history or empty array
   let history = JSON.parse(localStorage.getItem("read_history") || "[]");
-
-  // 2. Remove if duplicate (so we can move it to the top)
   history = history.filter((item) => item.id != book.id);
 
-  // 3. Create simple history object
   const historyItem = {
     id: book.id,
     title: book.title,
     author: book.author || "Unknown",
     thumbnail: book.thumbnail || "https://placehold.co/100",
-    category:
-      Array.isArray(book.categories) && book.categories[0]
-        ? book.categories[0].name
-        : "General",
-    date: new Date().toLocaleDateString("en-US", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    }),
-    timestamp: Date.now(), // Useful if you want to sort by time later
+    category: Array.isArray(book.categories) && book.categories[0] ? book.categories[0].name : "General",
+    date: new Date().toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" }),
+    timestamp: Date.now(),
   };
 
-  // 4. Add to the beginning of the array
   history.unshift(historyItem);
-
-  // 5. Limit to last 20 items to keep storage clean
   if (history.length > 20) history.pop();
-
-  // 6. Save back to storage
   localStorage.setItem("read_history", JSON.stringify(history));
 }
